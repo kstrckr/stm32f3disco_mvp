@@ -1,0 +1,5 @@
+/target
+*.org
+.#*
+.gdb_history
+/template
