@@ -9,8 +9,8 @@ edition = "2018"
 [dependencies]
 cortex-m = "0.7.2"
 cortex-m-rt = { version = "0.6.13", features = ["device"] }
+lsm303agr = "0.1.1"
 # Panic behaviour, see https://crates.io/keywords/panic-impl for alternatives
 panic-halt = "0.2.0"
 panic-itm = "0.4.2"
-# Replace stm32f303xc with your target chip, see next section for more info
 stm32f3-discovery = "0.6.0"

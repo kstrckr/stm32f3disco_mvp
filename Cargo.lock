@@ -179,6 +179,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "lsm303agr"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd90c82ff003fc308465cd71ea095ebb3b58da3eef584edb42ba400ea9cd2495"
+dependencies = [
+ "embedded-hal",
+ "nb 1.0.0",
+]
+
+[[package]]
 name = "lsm303dlhc"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -359,6 +369,7 @@ version = "0.1.0"
 dependencies = [
  "cortex-m 0.7.2",
  "cortex-m-rt",
+ "lsm303agr",
  "panic-halt",
  "panic-itm",
  "stm32f3-discovery",
