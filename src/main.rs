@@ -39,14 +39,19 @@ fn main() -> ! {
 
     loop {
         leds.ld3.toggle().ok();
-        delay.delay_ms(1000u16);
+        delay.delay_ms(100u16);
         leds.ld3.toggle().ok();
-        delay.delay_ms(1000u16);
+        delay.delay_ms(100u16);
 
         //explicit on/off
         leds.ld4.on().ok();
-        delay.delay_ms(1000u16);
+        delay.delay_ms(100u16);
         leds.ld4.off().ok();
+        delay.delay_ms(100u16);
+
+        leds.ld5.on().ok();
         delay.delay_ms(1000u16);
+        leds.ld5.off().ok();
+        delay.delay_ms(100u16);
     }
 }
