@@ -10,12 +10,24 @@ use stm32f3_discovery::stm32f3xx_hal::prelude::*;
 use stm32f3_discovery::stm32f3xx_hal::stm32;
 use stm32f3_discovery::stm32f3xx_hal::i2c::I2c;
 
-use stm32f3_discovery::leds::Leds;
+// use stm32f3_discovery::leds::Leds;
 use stm32f3_discovery::switch_hal::{OutputSwitch, ToggleableOutputSwitch};
 use lsm303agr::Lsm303agr;
 use lsm303agr::MagOutputDataRate;
+use lsm303agr::UnscaledMeasurement;
 
 // use stm32f3_discovery::stm32f3xx_hal::{self as hal, pac, prelude::*};
+
+const X_OFFSET:f32 = -47.0;
+const Y_OFFSET:f32 = 222.5;
+const Z_OFFSET:f32 = -15.5;
+
+fn apply_calibration_offset(measurement: UnscaledMeasurement) -> (f32, f32, f32) {
+    let calibrated_x = measurement.x as f32 - X_OFFSET;
+    let calibrated_y = measurement.y as f32 - Y_OFFSET;
+    let calibrated_z = measurement.z as f32 - Z_OFFSET;
+    (calibrated_x, calibrated_y, calibrated_z)
+}
 
 #[entry]
 fn main() -> ! {
@@ -50,8 +62,9 @@ fn main() -> ! {
     loop {
         if sensor.mag_status().unwrap().xyz_new_data {
             let data = sensor.mag_data().unwrap();
-            iprintln!(&mut itm.stim[0], "{}, {}, {}", data.x, data.y, data.z)
+            let (x, y, z) = apply_calibration_offset(data);
+            iprintln!(&mut itm.stim[0], "{}, {}, {}", x, y, z);
         }
-        delay.delay_ms(1000u16);
+        delay.delay_ms(50u8);
     }
 }
