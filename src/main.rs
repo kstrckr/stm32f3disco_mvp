@@ -93,13 +93,14 @@ impl IOStruct {
     }
 }
 
-fn format_data(x_data: [u8; 4], y_data: [u8; 4], z_data: [u8; 4]) -> [u8; 12] {
-    [x_data[0], x_data[1], x_data[2], x_data[3], y_data[0], y_data[1], y_data[2], y_data[3], z_data[0], z_data[1], z_data[2], z_data[3]]
+fn format_data(count: u32, x_data: [u8; 4], y_data: [u8; 4], z_data: [u8; 4]) -> [u8; 16] {
+    let count_bytes = count.to_le_bytes();
+    [x_data[0], x_data[1], x_data[2], x_data[3], y_data[0], y_data[1], y_data[2], y_data[3], z_data[0], z_data[1], z_data[2], z_data[3], count_bytes[0], count_bytes[1], count_bytes[2], count_bytes[3]]
     // [x_data[0], x_data[1], x_data[2], x_data[3]]
 }
 
-fn cobs_encode(all_data_bytes: [u8; 12]) -> [u8; 14] {
-    let mut encoded = [0; 14];
+fn cobs_encode(all_data_bytes: [u8; 16]) -> [u8; 18] {
+    let mut encoded = [0; 18];
     let mut prev_zero_index: Option<usize> = None;
 
     if all_data_bytes[0] == 0 {
@@ -149,23 +150,26 @@ fn cobs_encode(all_data_bytes: [u8; 12]) -> [u8; 14] {
 fn main() -> ! {
 
     let mut io_struct = IOStruct::new();
-    let mut initial_buf = singleton!(: [u8; 14] = [0; 14]).unwrap();
+    let mut initial_buf = singleton!(: [u8; 18] = [0; 18]).unwrap();
 
+    let max_measurements = 1000;
+    let mut count:u32 = 0;
     loop {
         // io_struct.delay.delay_ms(100u16);
         // let (buf, ch, tx) = io_struct.tx.write_all(initial_buf, io_struct.tx_channel).wait();
         // io_struct.tx_channel = ch;
         // io_struct.tx = tx;
         // initial_buf = buf;
-
+        // io_struct.delay.delay_ms(5u16);
         if io_struct.magnetometer.mag_status().unwrap().xyz_new_data {
             let data = io_struct.magnetometer.mag_data().unwrap();
+            count += 1;
             let (x, y, z) = apply_calibration_offset(data);
             let x_bytes = x.to_le_bytes();
             let y_bytes = y.to_le_bytes();
             let z_bytes = z.to_le_bytes();
 
-            let formatted_data = format_data(x_bytes, y_bytes, z_bytes);
+            let formatted_data = format_data(count, x_bytes, y_bytes, z_bytes);
             let framed_data = cobs_encode(formatted_data);
             initial_buf.copy_from_slice(&framed_data);
             let sending = io_struct.tx.write_all(initial_buf, io_struct.tx_channel);
@@ -173,7 +177,6 @@ fn main() -> ! {
             io_struct.tx_channel = ch;
             io_struct.tx = tx;
             initial_buf = buf;
-            // io_struct.delay.delay_ms(50u16);
         }
     }
 }
