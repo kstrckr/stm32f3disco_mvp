@@ -215,21 +215,27 @@ fn main() -> ! {
         &mut io_struct.gpioe.otyper,
     );
     let mut status_led = leds.ld3;
+    let mut on_led = leds.ld10;
 
 
     let mut initial_buf = singleton!(: [u8; 18] = [0; 18]).unwrap();
 
-    let max_measurements = 1000;
     let mut count:u32 = 0;
     let mut smoothed_x = 0.0;
     let mut smoothed_y = 0.0;
     let mut smoothed_z = 0.0;
 
-    let mut reading = false;
 
+    on_led.toggle().ok();
+    let mut reading = false;
+    wait_for_interrupt();
     loop {
         // io_struct.delay.delay_ms(100u16);
-
+        // check to see if flag was active and clear it
+        if USER_BUTTON_PRESSED.swap(false, Ordering::AcqRel) {
+            status_led.toggle().ok();
+            reading = !reading;
+        }
         if reading {
             if io_struct.magnetometer.mag_status().unwrap().xyz_new_data {
                 let data = io_struct.magnetometer.mag_data().unwrap();
@@ -251,11 +257,6 @@ fn main() -> ! {
                 io_struct.tx = tx;
                 initial_buf = buf;
             }
-        }
-        // check to see if flag was active and clear it
-        if USER_BUTTON_PRESSED.swap(false, Ordering::AcqRel) {
-            status_led.toggle().ok();
-            reading = !reading;
         }
 
         // wait_for_interrupt();
