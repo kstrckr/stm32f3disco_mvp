@@ -231,12 +231,6 @@ fn main() -> ! {
         // io_struct.delay.delay_ms(100u16);
 
         if reading {
-
-            let (buf, ch, tx) = io_struct.tx.write_all(initial_buf, io_struct.tx_channel).wait();
-            io_struct.tx_channel = ch;
-            io_struct.tx = tx;
-            initial_buf = buf;
-            io_struct.delay.delay_ms(5u16);
             if io_struct.magnetometer.mag_status().unwrap().xyz_new_data {
                 let data = io_struct.magnetometer.mag_data().unwrap();
                 count += 1;
